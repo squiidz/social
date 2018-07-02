@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/squiidz/social/handler"
+	"github.com/squiidz/social/graphServer"
 
 	"github.com/go-zoo/bone"
 	"github.com/go-zoo/claw"
@@ -15,9 +15,10 @@ func main() {
 	mux := bone.New()
 	mdlwr := claw.New(mw.Logger, mw.Zipper)
 	mux.RegisterValidatorFunc("isNum", isNum)
+	graphServer := graphServer.New()
 
-	mux.GetFunc("/distance/:userFrom|isNum/:userTo|isNum", handler.GetRelationHandler)
-	mux.GetFunc("/friends/:userFrom|isNum/:userTo|isNum", handler.GetCommonFriendHandler)
+	mux.GetFunc("/distance/:userFrom|isNum/:userTo|isNum", graphServer.GetRelationHandler)
+	mux.GetFunc("/friends/:userFrom|isNum/:userTo|isNum", graphServer.GetCommonFriendsHandler)
 
 	http.ListenAndServe(":8080", mdlwr.Merge(mux))
 }

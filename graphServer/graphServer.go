@@ -1,19 +1,27 @@
-package handler
+package graphServer
 
 import (
 	"encoding/json"
 	"net/http"
 	"strconv"
 
-	"github.com/squiidz/social/user"
+	"github.com/squiidz/social/graph"
 
 	"github.com/go-zoo/bone"
 )
 
-var graph = user.NewGraph()
+// GraphServer provide handler with access to a graph without delcaring a global one
+type GraphServer struct {
+	graph *graph.Graph
+}
+
+// New return a initialize GraphServer
+func New() GraphServer {
+	return GraphServer{graph: graph.NewGraph()}
+}
 
 // GetRelationHandler return the relation between 2 users if it exist
-func GetRelationHandler(rw http.ResponseWriter, req *http.Request) {
+func (gs GraphServer) GetRelationHandler(rw http.ResponseWriter, req *http.Request) {
 	params := bone.GetAllValues(req)
 
 	userFrom, err := strconv.Atoi(params["userFrom"])
@@ -28,7 +36,7 @@ func GetRelationHandler(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	relationIDs, err := graph.FindRelation(userFrom, userTo)
+	relationIDs, err := gs.graph.FindRelation(userFrom, userTo)
 	if err != nil {
 		http.NotFound(rw, req)
 		return
@@ -43,8 +51,8 @@ func GetRelationHandler(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(relation)
 }
 
-// GetCommonFriendHandler return the friends in common between 2 users
-func GetCommonFriendHandler(rw http.ResponseWriter, req *http.Request) {
+// GetCommonFriendsHandler return the friends in common between 2 users
+func (gs GraphServer) GetCommonFriendsHandler(rw http.ResponseWriter, req *http.Request) {
 	params := bone.GetAllValues(req)
 
 	userFrom, err := strconv.Atoi(params["userFrom"])
@@ -59,7 +67,7 @@ func GetCommonFriendHandler(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	commonFriends := graph.FindCommonFriends(userFrom, userTo)
+	commonFriends := gs.graph.FindCommonFriends(userFrom, userTo)
 	if len(commonFriends) == 0 {
 		http.NotFound(rw, req)
 		return

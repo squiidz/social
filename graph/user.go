@@ -1,4 +1,4 @@
-package user
+package graph
 
 // User is a basic struct to represent a Graph entry
 type User struct {
