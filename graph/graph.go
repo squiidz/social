@@ -3,6 +3,7 @@ package graph
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -25,7 +26,9 @@ func NewGraph() *Graph {
 
 	scanr := bufio.NewScanner(file)
 	for scanr.Scan() {
-		graph.processEntry(scanr.Text())
+		if err = graph.processEntry(scanr.Text()); err != nil {
+			log.Println(err)
+		}
 	}
 	if scanr.Err() != nil {
 		log.Panicln(scanr.Err())
@@ -36,8 +39,14 @@ func NewGraph() *Graph {
 // ProcessEntry build the friend graph
 func (g *Graph) processEntry(entry string) error {
 	entryToken := strings.Split(entry, " ")
-	userID, _ := strconv.Atoi(entryToken[0])
-	friendID, _ := strconv.Atoi(entryToken[1])
+	userID, err := strconv.Atoi(entryToken[0])
+	if err != nil {
+		return fmt.Errorf("%s is not a valid user ID", entryToken[0])
+	}
+	friendID, err := strconv.Atoi(entryToken[1])
+	if err != nil {
+		return fmt.Errorf("%s is not a valid friend ID", entryToken[1])
+	}
 
 	if _, ok := g.Users[userID]; !ok {
 		newUser := New(userID)
